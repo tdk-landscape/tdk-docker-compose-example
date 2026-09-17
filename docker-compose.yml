@@ -1,0 +1,10 @@
+services:
+  tdk:
+    build:
+      context: .
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      TDK_INSTALL_DIR: /usr/local/bin
+

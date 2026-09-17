@@ -1,0 +1,12 @@
+FROM ubuntu:24.04
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl sudo \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://tdk-landscape.github.io/install.sh | sh
+
+WORKDIR /workspace
+
+CMD ["tdk", "--help"]
+
