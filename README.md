@@ -7,11 +7,39 @@ Run TDK CLI from Docker Compose without installing the binary on your host.
 ```sh
 docker compose run --rm tdk tdk --version
 docker compose run --rm tdk tdk project --yes
+printf "\n" | docker compose run --rm -T tdk tdk resource database --type backend --stack pre-alpha --path services/pre-alpha/database
 printf "\n" | docker compose run --rm -T tdk tdk resource api --type backend --stack pre-alpha --path services/pre-alpha/api
 docker compose run --rm tdk tdk project --check
 ```
 
 The working directory is mounted into the container at `/workspace`, so generated files appear in this repo.
+
+## Add a dependency
+
+TDK/Tilt reads service boot order from `internalDependencies` in `service.json`.
+
+```sh
+docker compose run --rm -T tdk sh -lc 'node -e "
+const fs = require(\"fs\");
+const file = \"services/pre-alpha/api/service.json\";
+const service = JSON.parse(fs.readFileSync(file, \"utf8\"));
+service.internalDependencies = [\"database\"];
+fs.writeFileSync(file, JSON.stringify(service, null, 2) + \"\\n\");
+"'
+
+docker compose run --rm tdk tdk project --check
+```
+
+The important bit in `services/pre-alpha/api/service.json`:
+
+```json
+{
+  "name": "api",
+  "type": "backend",
+  "stack": "pre-alpha",
+  "internalDependencies": ["database"]
+}
+```
 
 ## Start a stack
 
@@ -26,4 +54,3 @@ For container-only smoke testing, validate the generated project instead:
 ```sh
 docker compose run --rm tdk tdk project --check
 ```
-
