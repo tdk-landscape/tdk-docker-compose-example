@@ -1,6 +1,6 @@
 # TDK Docker Compose example
 
-Run TDK CLI from Docker Compose without installing the binary on your host.
+Run [TDK CLI](https://github.com/tdk-landscape/tdk-cli-core) from Docker Compose without installing the binary on your host.
 
 ## Quick start
 
@@ -54,3 +54,7 @@ For container-only smoke testing, validate the generated project instead:
 ```sh
 docker compose run --rm tdk tdk project --check
 ```
+
+---
+
+⭐ **Using TDK?** [Star tdk-cli-core](https://github.com/tdk-landscape/tdk-cli-core) so other developers can find it.
