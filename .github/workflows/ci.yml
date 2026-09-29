@@ -1,0 +1,50 @@
+name: 🐳 Docker Compose Example CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tdk-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doctor:
+    name: 🩺 TDK doctor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Tilt
+        run: curl -fsSL https://raw.githubusercontent.com/tilt-dev/tilt/master/scripts/install.sh | bash
+      - name: Install TDK
+        run: npm install --global @tdk-landscape/tdk-cli-core@latest
+      - name: Run tdk doctor
+        run: tdk doctor --no-ping
+
+  e2e:
+    name: 🐳 Docker Compose project setup E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the TDK container
+        run: docker compose build tdk
+      - name: Verify TDK runs in Docker Compose
+        run: docker compose run --rm tdk tdk --version
+      - name: Generate a project and resources in the mounted workspace
+        shell: bash
+        run: |
+          docker compose run --rm tdk tdk project --yes
+          printf '\n' | docker compose run --rm -T tdk tdk resource database --type backend --stack pre-alpha --path services/pre-alpha/database
+          printf '\n' | docker compose run --rm -T tdk tdk resource api --type backend --stack pre-alpha --path services/pre-alpha/api
+      - name: Verify generated project configuration
+        run: docker compose run --rm tdk tdk project --check
