@@ -1,4 +1,4 @@
-name: TDK CI
+name: 🐳 Docker Compose Example CI
 
 on:
   pull_request:
